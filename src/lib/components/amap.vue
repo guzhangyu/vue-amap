@@ -213,6 +213,7 @@ export default {
         mapElement.id = elementID;
         this.$amap = this.$amapComponent = new AMap.Map(elementID, this.convertProps());
         if (this.amapManager) this.amapManager.setMap(this.$amap);
+				// console.log(AMap)
         this.$emit(CONST.AMAP_READY_EVENT, this.$amap);
         this.$children.forEach(component => {
           component.$emit(CONST.AMAP_READY_EVENT, this.$amap);

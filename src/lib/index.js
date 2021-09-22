@@ -9,6 +9,7 @@ import {initAMapApiLoader} from './services/injected-amap-api-instance';
 // 组建导入
 import AMap from './components/amap.vue';
 import AMapMarker from './components/amap-marker.vue';
+import AMapElasticMarker from './components/amap-elastic-marker.vue';
 import AMapSearchBox from './components/amap-search-box.vue';
 import AMapCircle from './components/amap-circle.vue';
 import AMapGroupImage from './components/amap-ground-image.vue';
@@ -28,6 +29,7 @@ import createCustomComponent from './adapter/custom-adapter';
 let components = [
   AMap,
   AMapMarker,
+  AMapElasticMarker,
   AMapSearchBox,
   AMapCircle,
   AMapGroupImage,

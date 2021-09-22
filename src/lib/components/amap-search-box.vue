@@ -119,7 +119,8 @@ export default {
   computed: {
     _autoComplete() {
       if (!this.loaded) return;
-      return new AMap.Autocomplete(this.searchOption || {});
+	  console.log(AMap)
+      return new AMap.AutoComplete(this.searchOption || {});
     },
     _placeSearch() {
       if (!this.loaded) return;
@@ -146,6 +147,7 @@ export default {
       }
       this._placeSearch.setCity(city || this.searchOption.city);
       this._placeSearch.search(this.keyword, (status, result) => {
+		console.log("placeSearch", status, result)
         if (result && result.poiList && result.poiList.count) {
           let {poiList: {pois}} = result;
           let LngLats = pois.map(poi => {
