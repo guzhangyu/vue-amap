@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style lang="less">
+			#app {
+				height: 400px;
+			}
+			
+			.el-vue-search-box-container {
+			  position: relative;
+			  width: 360px;
+			  height: 45px;
+			  background: #fff;
+			  box-shadow: 0 2px 2px rgba(0,0,0,.15);
+			  border-radius: 2px 3px 3px 2px;
+			  z-index: 10;
+			  .search-box-wrapper {
+			    position: absolute;
+			    display: flex;
+			    align-items: center;
+			    left: 0;
+			    top: 0;
+			    width: 100%;
+			    height: 100%;
+			    box-sizing: border-box;
+			
+			    input {
+			      flex: 1;
+			      height: 20px;
+			      line-height: 20px;
+			      letter-spacing: .5px;
+			      font-size: 14px;
+			      text-indent: 10px;
+			      box-sizing: border-box;
+			      border: none;
+			      outline: none;
+			    }
+			
+			    .search-btn {
+			      width: 45px;
+			      height: 100%;
+			      display: flex;
+			      align-items: center;
+			      justify-content: center;
+			      background: transparent;
+			      cursor: pointer;
+			    }
+			  }
+			
+			  .search-tips {
+			    position: absolute;
+			    top: 100%;
+			    border: 1px solid #dbdbdb;
+			    background: #FFF;
+			    overflow: auto;
+			
+			    ul {
+			      padding: 0;
+			      margin: 0;
+			
+			      li {
+			        height: 40px;
+			        line-height: 40px;
+			        box-shadow: 0 1px 1px rgba(0,0,0,.1);
+			        padding: 0 10px;
+			        cursor: pointer;
+			
+			        &.autocomplete-selected {
+			          background: #eee;
+			        }
+			      }
+			    }
+			  }
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app">
+			<!-- <el-amap-search-box :search-option="searchOption" :on-search-result="handleSearchResult">
+			</el-amap-search-box> -->
+			<input type="text" v-model="searchKeyword" @keydown="searchKey"/>
+			<div id="search_result" ref="search_result"></div>
+			<amap-place-searcher ref="placeSearcher" :citylimit="false" :panel="$refs.search_result" :map="amap"></amap-place-searcher>
+			<!-- <div class="el-vue-search-box-container"
+			     @keydown.up="selectTip('up')"
+			     @keydown.down="selectTip('down')">
+			  <div class="search-box-wrapper">
+			    <input type="text"
+			      v-model="keyword"
+			      @keyup.enter="search">
+			    <span class="search-btn" @click="search" >搜索</span>
+			  </div>
+			  <div class="search-tips">
+			    <ul>
+			      <li v-for="(tip, index) in tips"
+			        :key="index"
+			        @click="changeTip(tip)"
+			        @mouseover="selectedTip=index"
+			        :class="{'autocomplete-selected': index === selectedTip}">{{tip.name}}</li>
+			    </ul>
+			  </div>
+			</div> -->
+			
+			<el-amap ref="amapDemo" vid="amap" :center="[121.59996, 31.197646]" :plugin="plugin">
+				<el-amap-elastic-marker 
+					v-for="device in devices" :key="device.id"
+					:styles="[{icon: {img: device.deviceTypeImg, ancher:[8,16], size: [16, 16], imageOffset:[0,0], fitZoom: 8, scaleFactor: 2, maxScale: 8, minScale: 0.5}, label:{content:device.name,position:'BM',offset:[-35,0],minZoom:12}}]"
+					:map="amap" :position="[device.longitude, device.latitude]"
+					:events="device.events"
+					:zoom-style-mapping="{7:0, 8:0, 9:0, 10:0, 11: 0, 12:0,  13:0, 14:0, 15:0, 16:0, 17:0, 18:0, 19:0, 20:0}"
+					></el-amap-elastic-marker>
+				<el-amap-marker v-for="marker in markers" :position="marker.position" :events="marker.events"></el-amap-marker>
+				<el-amap-info-window v-if="window" :position="window.position" :visible="window.visible" :content="window.content"></el-amap-info-window>
+					<!-- , {icon: {img: device.deviceTypeImg, size: [32, 32],  ancher:[8,16], imageSize: [512, 512], imageOffset:[360,340], fitZoom: 16, scaleFactor: 2, maxScale: 2, minScale: 1}, label:{content:device.name, position:'BM', offset:[-35,0], minZoom:16}}] -->
+					<!--  -->
+					<!-- :topWhenClick="false" :bubble="false" :draggable="false" cursor="cur" :visible="true" :z-index="100"
+					:extData="device.id"-->
+			</el-amap>
+		</div>
+	</body>
+	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+	<script src="./static/dist/index.js"></script>
+	<script src="https://webapi.amap.com/ui/1.1/main-async.js"></script>
+	<script>
+		console.log('before amap')
+		const amap = window.VueAMap.initAMapApiLoader({
+			key: '07d4cc4b79a81f383b7909c80742bcb1',
+			plugin: ['Autocomplete', 'PlaceSearch', 'Scale', 'OverView', 'ToolBar', 'MapType', 'PolyEditor', 'AMap.CircleEditor', 'Geolocation', 'Geocoder', 'MarkerClusterer', 'ElasticMarker'],
+			v: '2.0',
+			uiVersion: '1.1'
+		})
+		// amap.plugin({serviceNames: ['Autocomplete', 'PlaceSearch']})
+		// window.VueAMap.lazyAMapApiLoaderInstance.load().then(() => {
+		// 	console.log(AMap)
+		// 	AMap.plugin(
+		// 		['PlaceSearch'], function(e) {
+		// 			console.log(e)
+		// 		}
+		// 	)
+		// })
+		const AMapPlaceSearcher = window.VueAMap.createCustomComponent({
+			name: 'amap-place-searcher',
+			props: [
+				'citylimit', 'map', 'panel', 'renderStyle', 'autoFitView'
+			],
+			data() {
+				return {
+					placeSearcher: null
+				}
+			},
+			contextReady() {
+			  console.log('context ready', AMap)
+			  var placeSearcher = new AMap.PlaceSearch({
+			  	citylimit: this.citylimit,
+			  	map: this.map,
+			  	panel: this.panel,
+			  	renderStyle: this.renderStyle,
+			  	autoFitView: this.autoFitView
+			  })
+			  console.log(placeSearcher)
+			  this.placeSearcher = placeSearcher
+			},
+			handlers: {
+				search(keyword, callback) {
+					this.search(keyword, callback)
+				}
+			},
+			init(options, map) {
+				console.log('init...')
+				return new Promise((resolve, reject) => {
+					var placeSearcher = new AMap.PlaceSearch({
+						citylimit: this.citylimit,
+						map: this.map,
+						panel: this.panel,
+						renderStyle: this.renderStyle,
+						autoFitView: this.autoFitView
+					})
+					console.log(placeSearcher)
+					this.placeSearcher = placeSearcher
+					resolve(placeSearcher)
+				})
+			},
+			methods: {
+				search(keyword, callback) {
+					this.placeSearcher.search(keyword, callback)
+				}
+			}
+		})
+		
+		Vue.component('amap-place-searcher', AMapPlaceSearcher)
+		console.log(window.VueAMap)
+		
+		console.log('after amap')
+		new Vue({
+			el: '#app',
+			components: { AMapPlaceSearcher },
+			data: function() {
+				const self = this
+				return {
+					searchKeyword: '',
+					amap: amap,
+					devices: [
+						{
+							id: 1,
+							deviceTypeImg: './static/img/electric_meter_gray.png',
+							longitude: 121.59996,
+							latitude: 31.197646,
+							name: '测试设备',
+							events: {
+								click(e) {
+									console.log(e)
+								  console.log(1)
+								}
+							}
+						}
+					],
+					searchOption: {citylimit: false, panel: 'search_result'},
+					plugin: [
+					// {
+					//   enableHighAccuracy: true,
+					//   timeout: 100,
+					//   maximumAge: 0,
+					//   convert: true,
+					//   showButton: true,
+					//   buttonPosition: 'RB',
+					//   showMarker: true,
+					//   showCircle: true,
+					//   panToLocation: true,
+					//   extensions: 'all',
+					//   pName: 'Geolocation',
+					//   events: {
+					//     init(o) {
+					//       o.getCurrentPosition((status, result) => {
+					//         console.log(result)
+					//         if (result && result.position) {
+					//           self.lng = result.position.lng
+					//           self.lat = result.position.lat
+					//           self.center = [self.lng, self.lat]
+					//           self.loaded = true
+					//         }
+					//       })
+					//     },
+					//     complete() {
+					//       // self.$refs.amapDemo.$$getInstance().setFitView()
+					//     }
+					//   }
+					// },
+					{
+					  pName: 'ElasticMarker'
+					},{
+						pName: 'ToolBar'
+					},{
+						pName: 'Scale'
+					}],
+					
+					windows: [],
+					window: '',
+					markers: []
+				}
+			},
+			created() {
+				console.log(this.searchOption)
+				let num = 10;
+				let self = this;
+				
+				let windows = [];
+				let markers = [];
+				
+				for(let i=0; i < num; i++) {
+					markers.push({
+					  position: [121.59996, 31.197646 + i * 0.001],
+					  events: {
+					    click() {
+					      self.windows.forEach(window => {
+					        window.visible = false;
+					      });
+					
+					      self.window = self.windows[i];
+					      self.$nextTick(() => {
+					        self.window.visible = true;
+					      });
+					    }
+					  }
+					});
+					
+					windows.push({
+					  position: [121.59996, 31.197646 + i * 0.001],
+					  content: `<div class="prompt">${ i }</div>`,
+					  visible: false
+					});
+				}
+				this.markers = markers;
+				this.windows = windows
+				
+				
+			},
+			methods: {
+				searchKey(e) {
+					if(e.key === 'Enter') {
+						console.log(this.$refs.placeSearcher)
+						this.$refs.placeSearcher.search(this.searchKeyword, function(status, result) {
+							console.log(status)
+							if(status === 'complete') {
+								console.log(result)
+							}
+						})
+						
+						const amap = this.$refs.amapDemo.$amap
+						amap.add(new AMap.Marker({position: [120.72688, 27.967449], map: amap}))
+					}
+				},
+				getDeviceDetailRouteEvent(id) {
+				  return {
+				    click() {
+				      console.log(id)
+				    }
+				  }
+				},
+				handleSearchResult(e) {
+					console.log(e)
+				}
+			}
+		})
+	</script>
+</html>
