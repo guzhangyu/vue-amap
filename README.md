@@ -58,6 +58,18 @@ VueAMap.initAMapApiLoader({
 </el-amap>
 ```
 
+### 可伸缩点坐标
+
+```vue
+<el-amap vid="amapDemo" :zoom="zoom" :center="center">
+  <el-amap-elastic-marker v-for="marker in markers"
+  :styles="[{icon: {img: marker.img, ancher:[8,16], size: [16, 16], imageOffset:[0,0], fitZoom: 8, scaleFactor: 2, maxScale: 8, minScale: 0.5}, label:{content:marker.name, position:'BM', offset:[-35,0], minZoom:12}}]"
+  :position="marker.position"
+  :events="marker.events"
+  :zoom-style-mapping="{7:0, 8:0, 9:0, 10:0, 11: 0, 12:0,  13:0, 14:0, 15:0, 16:0, 17:0, 18:0, 19:0, 20:0}"></el-amap-elastic-marker>
+</el-amap>
+```
+
 ### 折线
 
 ```vue
