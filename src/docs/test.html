@@ -78,32 +78,12 @@
 	</head>
 	<body>
 		<div id="app">
-			<!-- <el-amap-search-box :search-option="searchOption" :on-search-result="handleSearchResult">
-			</el-amap-search-box> -->
-			<input type="text" v-model="searchKeyword" @keydown="searchKey"/>
-			<div id="search_result" ref="search_result"></div>
 			<amap-place-searcher ref="placeSearcher" :citylimit="false" :panel="$refs.search_result" :map="amap"></amap-place-searcher>
-			<!-- <div class="el-vue-search-box-container"
-			     @keydown.up="selectTip('up')"
-			     @keydown.down="selectTip('down')">
-			  <div class="search-box-wrapper">
-			    <input type="text"
-			      v-model="keyword"
-			      @keyup.enter="search">
-			    <span class="search-btn" @click="search" >搜索</span>
-			  </div>
-			  <div class="search-tips">
-			    <ul>
-			      <li v-for="(tip, index) in tips"
-			        :key="index"
-			        @click="changeTip(tip)"
-			        @mouseover="selectedTip=index"
-			        :class="{'autocomplete-selected': index === selectedTip}">{{tip.name}}</li>
-			    </ul>
-			  </div>
-			</div> -->
+
+			<el-amap-search-box :search-option="searchOption" :on-search-result="onSearchResult"></el-amap-search-box>
+			<el-amap-autocomplete :auto-complete-option="{}" :on-result-select="onResultSelect" />
 			
-			<el-amap ref="amapDemo" vid="amap" :center="[121.59996, 31.197646]" :plugin="plugin">
+			<el-amap ref="amapDemo" vid="amap" :center="[121.59996, 31.197646]" :plugin="plugin" :events="amapEvents">
 				<el-amap-elastic-marker 
 					v-for="device in devices" :key="device.id"
 					:styles="[{icon: {img: device.deviceTypeImg, ancher:[8,16], size: [16, 16], imageOffset:[0,0], fitZoom: 8, scaleFactor: 2, maxScale: 8, minScale: 0.5}, label:{content:device.name,position:'BM',offset:[-35,0],minZoom:12}}]"
@@ -127,19 +107,11 @@
 		console.log('before amap')
 		const amap = window.VueAMap.initAMapApiLoader({
 			key: '07d4cc4b79a81f383b7909c80742bcb1',
-			plugin: ['Autocomplete', 'PlaceSearch', 'Scale', 'OverView', 'ToolBar', 'MapType', 'PolyEditor', 'AMap.CircleEditor', 'Geolocation', 'Geocoder', 'MarkerClusterer', 'ElasticMarker'],
+			plugin: ['AMap.AutoComplete', 'PlaceSearch', 'Scale', 'OverView', 'ToolBar', 'MapType', 'PolyEditor', 'AMap.CircleEditor', 'Geolocation', 'Geocoder', 'MarkerClusterer', 'ElasticMarker'],
 			v: '2.0',
 			uiVersion: '1.1'
 		})
-		// amap.plugin({serviceNames: ['Autocomplete', 'PlaceSearch']})
-		// window.VueAMap.lazyAMapApiLoaderInstance.load().then(() => {
-		// 	console.log(AMap)
-		// 	AMap.plugin(
-		// 		['PlaceSearch'], function(e) {
-		// 			console.log(e)
-		// 		}
-		// 	)
-		// })
+		
 		const AMapPlaceSearcher = window.VueAMap.createCustomComponent({
 			name: 'amap-place-searcher',
 			props: [
@@ -190,16 +162,15 @@
 		})
 		
 		Vue.component('amap-place-searcher', AMapPlaceSearcher)
-		console.log(window.VueAMap)
-		
 		console.log('after amap')
+		
+		
 		new Vue({
 			el: '#app',
 			components: { AMapPlaceSearcher },
 			data: function() {
 				const self = this
 				return {
-					searchKeyword: '',
 					amap: amap,
 					devices: [
 						{
@@ -216,7 +187,10 @@
 							}
 						}
 					],
-					searchOption: {citylimit: false, panel: 'search_result'},
+					searchOption: {
+						citylimit: false
+						// panel: 'search_result',
+					},
 					plugin: [
 					// {
 					//   enableHighAccuracy: true,
@@ -257,11 +231,18 @@
 					
 					windows: [],
 					window: '',
-					markers: []
+					markers: [],
+					
+					amapEvents: {
+						complete() {
+							this.$nextTick(() => {
+								this.searchOption.map = this.$refs.amapDemo.$amap
+							})
+						}
+					}
 				}
 			},
 			created() {
-				console.log(this.searchOption)
 				let num = 10;
 				let self = this;
 				
@@ -293,23 +274,13 @@
 				}
 				this.markers = markers;
 				this.windows = windows
-				
-				
 			},
 			methods: {
-				searchKey(e) {
-					if(e.key === 'Enter') {
-						console.log(this.$refs.placeSearcher)
-						this.$refs.placeSearcher.search(this.searchKeyword, function(status, result) {
-							console.log(status)
-							if(status === 'complete') {
-								console.log(result)
-							}
-						})
-						
-						const amap = this.$refs.amapDemo.$amap
-						amap.add(new AMap.Marker({position: [120.72688, 27.967449], map: amap}))
-					}
+				onResultSelect(adcode, name, location) {
+					console.log(adcode, name, location)
+				},
+				onSearchResult(pois) {
+					console.log('pois', pois)
 				},
 				getDeviceDetailRouteEvent(id) {
 				  return {
@@ -317,9 +288,6 @@
 				      console.log(id)
 				    }
 				  }
-				},
-				handleSearchResult(e) {
-					console.log(e)
 				}
 			}
 		})

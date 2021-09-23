@@ -7,7 +7,7 @@
         v-model="keyword"
         @keyup.enter="search"
         @input="autoComplete">
-      <span class="search-btn" @click="search" >搜索</span>
+      <span v-if="showSearchBtn" class="search-btn" @click="search" >搜索</span>
     </div>
     <div class="search-tips">
       <ul>
@@ -94,7 +94,7 @@ import {lazyAMapApiLoaderInstance} from '../services/injected-amap-api-instance'
 export default {
   name: 'el-amap-search-box',
   mixins: [RegisterComponentMixin],
-  props: ['searchOption', 'onSearchResult', 'events', 'default'],
+  props: ['searchOption', 'onSearchResult', 'events', 'default', 'showSearchBtn'],
   data() {
     return {
       keyword: this.default || '',
@@ -119,7 +119,6 @@ export default {
   computed: {
     _autoComplete() {
       if (!this.loaded) return;
-	  console.log(AMap)
       return new AMap.AutoComplete(this.searchOption || {});
     },
     _placeSearch() {
@@ -147,7 +146,6 @@ export default {
       }
       this._placeSearch.setCity(city || this.searchOption.city);
       this._placeSearch.search(this.keyword, (status, result) => {
-		console.log("placeSearch", status, result)
         if (result && result.poiList && result.poiList.count) {
           let {poiList: {pois}} = result;
           let LngLats = pois.map(poi => {

@@ -11,6 +11,7 @@ import AMap from './components/amap.vue';
 import AMapMarker from './components/amap-marker.vue';
 import AMapElasticMarker from './components/amap-elastic-marker.vue';
 import AMapSearchBox from './components/amap-search-box.vue';
+import AMapAutoComplete from './components/amap-autocomplete.vue';
 import AMapCircle from './components/amap-circle.vue';
 import AMapGroupImage from './components/amap-ground-image.vue';
 import AMapInfoWindow from './components/amap-info-window.vue';
@@ -31,6 +32,7 @@ let components = [
   AMapMarker,
   AMapElasticMarker,
   AMapSearchBox,
+  AMapAutoComplete,
   AMapCircle,
   AMapGroupImage,
   AMapInfoWindow,
