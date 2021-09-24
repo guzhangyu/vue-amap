@@ -90,6 +90,7 @@
     "webpack-merge": "^2.6.1"
   },
   "dependencies": {
+    "fsevents": "1.2.13",
     "uppercamelcase": "^1.1.0"
   },
   "eslintConfig": {
