@@ -166,7 +166,7 @@ export default {
           for (let k in _plugin.events) {
             let v = _plugin.events[k];
             if (k === 'init') v(pluginInstance);
-            else AMap.event.addListener(pluginInstance, k, v);
+            else AMap.Event.addListener(pluginInstance, k, v);
           }
         }
       });
